@@ -1,14 +1,14 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"
 "http://www.w3.org/TR/html4/strict.dtd">
+<!-- vim: set expandtab ts=4 sw=4: -->
 <!-- 
         Weather Thing
 
         This is a web thing to visualize weather data.
 
-        If you're interested, the source is at (github)
+        If you're interested, the source is at
 
-        
-
+        http://github.com/oldpatricka/Weather-Thing
 -->
 <html>
 <head>
@@ -19,7 +19,52 @@ triplefox.com
 <style type="text/css">
 
 </style>
+
+<script type="text/javascript" src="js/jquery.js"></script>
+<script type="text/javascript" src="js/processing.js"></script>
+
 </head>
 <body>
+<script>
+
+    var p = {};
+
+    var wview = {};
+
+    wview.setup = function() {
+        p.size(800,600);
+        p.background(0);
+        p.noLoop();
+    }
+
+    var i = 0;
+
+    wview.draw = function() {
+        $.getJSON("/weatherdata?fyear=2008&fmonth=08&tyear=2008&tmonth=09&station=118",
+            function(data){
+                $.each(data, function(time, temperature) {
+                    console.log(time + " " + temperature);
+                    p.stroke(255);
+                    p.point(i, parseFloat(temperature));
+                    i++;
+
+                    var thisDate = new Date(time);
+                    console.log(thisDate.getMilliseconds());
+                });
+            });
+        p.exit();
+    }
+
+    $(document).ready(function() {
+
+
+        p = Processing("weather");
+        p.setup = wview.setup;
+        p.draw = wview.draw;
+        p.init();
+    });
+
+
+    </script><canvas id="weather" width="800" height="600"></canvas>
 </body>
 </html>

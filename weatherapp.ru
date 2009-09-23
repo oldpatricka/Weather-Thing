@@ -71,8 +71,13 @@ weather_json = Proc.new {|env|
   parsed_weather = CSV.parse(weather_in_csv)
 
   t_at_time = {}
+  p parsed_weather
+
   parsed_weather.each{|row|
-    t_at_time[row[0]] = row[5]
+    if row[5] != "" then
+      time = DateTime.parse(row[0]).strftime(fmt="%s")
+      t_at_time[time] = row[5]
+    end
   }
 
   if ret # has already been defined above
