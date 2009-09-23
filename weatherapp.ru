@@ -71,7 +71,6 @@ weather_json = Proc.new {|env|
   parsed_weather = CSV.parse(weather_in_csv)
 
   t_at_time = {}
-  p parsed_weather
 
   parsed_weather.each{|row|
     if row[5] != "" then
@@ -88,13 +87,24 @@ weather_json = Proc.new {|env|
   end
 }
 
-use Rack::Lint;
+# Stolen from Rack::Cache
+class Rewriter < Struct.new(:app)
+  def call(env)
+    if env['PATH_INFO'] =~ /\/$/
+      env['PATH_INFO'] += 'index.html'
+    end
+    app.call(env)
+  end
+end
+
 
 builder = Rack::Builder.new do
+
+  use Rack::Lint
+  use Rewriter
   
-  # Default File Handler
   map '/' do
-    run Rack::File.new('.')
+    run Rack::File.new('public/')
   end
 
   # Give us some weather data
