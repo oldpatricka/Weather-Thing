@@ -25,7 +25,9 @@ triplefox.com
 
 </head>
 <body>
+    <center>
 <script>
+
 
     var p = {};
 
@@ -33,24 +35,42 @@ triplefox.com
 
     wview.setup = function() {
         p.size(800,600);
-        p.background(0);
+        p.background(255);
         p.noLoop();
     }
 
-    var i = 0;
-
     wview.draw = function() {
-        $.getJSON("/weatherdata?fyear=2008&fmonth=08&tyear=2008&tmonth=09&station=118",
-            function(data){
-                $.each(data, function(time, temperature) {
-                    console.log(time + " " + temperature);
-                    p.stroke(255);
-                    p.point(i, parseFloat(temperature));
-                    i++;
+        $.getJSON("/weatherdata?&station=118",
+        function(data){
 
-                    var thisDate = new Date(time);
-                    console.log(thisDate.getMilliseconds());
-                });
+                keys = []
+                for (key in data) {
+
+                    keys.push(String(key));
+                }
+
+                keys.sort();
+                smallest = keys[0];
+
+                lastt = 0;
+                lasttemp = (data[keys[0]]) * (p.height / 60);
+
+                for (k=1; k < keys.length; k++) {
+                    p.stroke(0);
+    
+                    console.log(p.width + " " + keys.length);
+
+                    var t = (keys[k] - keys[0]) * (p.width / (keys[keys.length - 1] - keys[0]));
+                    var temp = (data[keys[k]]) * (p.height / 60);
+                    p.line(lastt, lasttemp, t, temp);
+
+                    lastt = t;
+                    lasttemp = temp
+                }
+
+                // Draw legend markers
+                p.stroke(0, 255/2);
+                p.line(0, p.height/2, p.width, p.height/2);
             });
         p.exit();
     }
@@ -65,6 +85,6 @@ triplefox.com
     });
 
 
-    </script><canvas id="weather" width="800" height="600"></canvas>
+    </script><canvas id="weather" width="800" height="600"></canvas></center>
 </body>
 </html>
