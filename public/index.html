@@ -61,7 +61,7 @@ triplefox.com
                     console.log(p.width + " " + keys.length);
 
                     var t = (keys[k] - keys[0]) * (p.width / (keys[keys.length - 1] - keys[0]));
-                    var temp = (data[keys[k]]) * (p.height / 60);
+                    var temp = (30 - data[keys[k]]) * (p.height / 60);
                     p.line(lastt, lasttemp, t, temp);
 
                     lastt = t;
@@ -73,6 +73,7 @@ triplefox.com
                 p.line(0, p.height/2, p.width, p.height/2);
                 p.stroke(0, 25);
                 p.line(0, p.height/4, p.width, p.height/4);
+                p.line(0, 0, p.width, 0);
             });
         p.exit();
     }
