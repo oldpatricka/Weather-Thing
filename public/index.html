@@ -28,6 +28,7 @@ triplefox.com
     <center>
 <script>
 
+    var tzOffsetInMs = (new Date()).getTimezoneOffset() * 60 * 1000;
 
     var p = {};
 
@@ -43,27 +44,38 @@ triplefox.com
         $.getJSON("/weatherdata?&station=118",
         function(data){
 
-                keys = []
+                times = []
                 for (key in data) {
 
-                    keys.push(String(key));
+                    times.push(String(key));
                 }
 
-                keys.sort();
-                smallest = keys[0];
+                times.sort();
+                smallest = times[0];
 
-                lastt = 0;
-                lasttemp = (data[keys[0]]) * (p.height / 60);
+                var lastt = 0;
+                var lasttemp = (data[times[0]]) * (p.height / 60);
+                lastdate = (new Date(times[0]*1000 + tzOffsetInMs)).getDate();
 
-                for (k=1; k < keys.length; k++) {
+                for (k=1; k < times.length; k++) {
                     p.stroke(0);
     
-                    console.log(p.width + " " + keys.length);
+                    console.log(p.width + " " + times.length);
 
-                    var t = (keys[k] - keys[0]) * (p.width / (keys[keys.length - 1] - keys[0]));
-                    var temp = (30 - data[keys[k]]) * (p.height / 60);
+                    var t = (times[k] - times[0]) * (p.width / (times[times.length - 1] - times[0]));
+                    var temp = (30 - data[times[k]]) * (p.height / 60);
                     p.line(lastt, lasttemp, t, temp);
 
+                    // Calculate date tics
+                    thisdate = (new Date(times[k]*1000 + tzOffsetInMs)).getDate();
+                    if (thisdate != lastdate) {
+                        console.log(thisdate + " " + lastdate);
+                        p.stroke(0, 25);
+                        p.line(t, 0, t, p.height);
+                        lastdate = thisdate;
+                    }
+                    
+                    //lastrealtime = realtime;
                     lastt = t;
                     lasttemp = temp
                 }
