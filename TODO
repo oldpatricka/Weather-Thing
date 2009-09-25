@@ -1,3 +1,2 @@
-* Use Rack::Cache for caching
-* Add date markers.
-
+* Read up on proper HTTP cacheing (using etags or something), and replace what we've got.
+* Split off drawing into its own function, allow user to redraw scale.

@@ -14,7 +14,7 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <title>
-triplefox.com
+Weather Thing
 </title>
 <style type="text/css">
 
@@ -60,8 +60,6 @@ triplefox.com
                 for (k=1; k < times.length; k++) {
                     p.stroke(0);
     
-                    console.log(p.width + " " + times.length);
-
                     var t = (times[k] - times[0]) * (p.width / (times[times.length - 1] - times[0]));
                     var temp = (30 - data[times[k]]) * (p.height / 60);
                     p.line(lastt, lasttemp, t, temp);
@@ -69,7 +67,6 @@ triplefox.com
                     // Calculate date tics
                     thisdate = (new Date(times[k]*1000 + tzOffsetInMs)).getDate();
                     if (thisdate != lastdate) {
-                        console.log(thisdate + " " + lastdate);
                         p.stroke(0, 25);
                         p.line(t, 0, t, p.height);
                         lastdate = thisdate;
