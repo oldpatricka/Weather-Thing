@@ -6,6 +6,7 @@ require 'open-uri'
 require 'date'
 require 'csv'
 require 'json'
+require 'rack/cache'
 
 # Return JSON weather data
 weather_json = Proc.new {|env|
@@ -83,7 +84,7 @@ weather_json = Proc.new {|env|
     ret
   else
     json = JSON.generate t_at_time
-    [200, { 'Content-Type' => 'text/plain' }, json]
+    [200, { 'Content-Type' => 'text/plain', 'Cache-Control' => 'max-age=3600, must-revalidate' }, json]
   end
 }
 
@@ -102,7 +103,8 @@ builder = Rack::Builder.new do
 
   use Rack::Lint
   use Rewriter
-  
+  use Rack::Cache, :verbose     => true, :metastore   => 'heap:/', :metastore   => 'heap:/'
+
   map '/' do
     run Rack::File.new('public/')
   end
