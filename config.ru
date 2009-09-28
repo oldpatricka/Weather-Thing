@@ -12,7 +12,7 @@ require 'rack/cache'
 weather_json = Proc.new {|env|
 
   datauri = "http://www.climate.weatheroffice.ec.gc.ca/climateData/" <<
-            "bulkdata_e.html?timeframe=1&format=csv&type=hly&StationID=118" 
+            "bulkdata_e.html?timeframe=1&format=csv&type=hly" 
 
   req = Rack::Request.new(env)
 
@@ -63,8 +63,8 @@ weather_json = Proc.new {|env|
     puts "DEBUG - Getting data from %s to %s" % [from.to_s, to.to_s]
     from_month.upto(to_month) { |this_month|
       
-      this_uri = datauri + "&Year=%d&Month=%d&Day=%d" %
-                            [this_year, this_month, 0]
+      this_uri = datauri + "&Year=%d&Month=%d&Day=%d&StationID=%d" %
+                            [this_year, this_month, 0, station]
       # Grab weather and remove headers in CSV that we don't need.
       weather_in_csv << URI.parse(this_uri).read.gsub(/.*"Weather"\n(.*)/m, '\1')
     }
@@ -103,7 +103,7 @@ builder = Rack::Builder.new do
 
   use Rack::Lint
   use Rewriter
-  use Rack::Cache, :verbose     => true, :metastore   => 'heap:/', :metastore   => 'heap:/'
+  use Rack::Cache, :verbose     => true, :metastore   => 'file:./tmp/rack/meta', :entitystore => 'file:./tmp/rack/body'
 
   map '/' do
     run Rack::File.new('public/')

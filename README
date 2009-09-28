@@ -1,0 +1,7 @@
+To get this running, you need to install the json and rack gems:
+
+sudo gem install rack json
+
+You can start it with:
+
+rackup config.ru -p 3000

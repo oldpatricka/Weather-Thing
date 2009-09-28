@@ -28,62 +28,99 @@ Weather Thing
     <center>
 <script>
 
+    var getUrlVars = function() {
+        var map = {};
+        var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
+            map[key] = value;
+        });
+        return map;
+    }
+
+    var getData = function() {
+        $.getJSON("/weatherdata?&station=118",
+        function(weatherData){
+            data = weatherData;
+            wview.draw();
+        });
+    }
+
+    var data = {};
+    var urlVars = getUrlVars();
     var tzOffsetInMs = (new Date()).getTimezoneOffset() * 60 * 1000;
-
     var p = {};
-
     var wview = {};
+    var from, to;
+
+    // Date and Time helpers
+    var today = new Date();
+    var thisYear = today.getFullYear();
+    var thisMonth = today.getMonth();
+    var thisDay = today.getDate();
+
+
+    if (urlVars["from"]) {
+        from = new Date(urlVars["from"]*1000);
+    }
+    else {
+        from = new Date(thisYear, thisMonth, 1);
+    }
+
+    if (urlVars["to"]) {
+        to = new Date(urlVars["to"]);
+    }
+    else {
+        to = new Date();
+    }
+
 
     wview.setup = function() {
         p.size(800,600);
-        p.background(255);
         p.noLoop();
     }
 
     wview.draw = function() {
-        $.getJSON("/weatherdata?&station=118",
-        function(data){
+        p.background(255);
+        p.fill(255);
+        p.rect(0, 0, p.width, p.height);
+        var times = []
+        for (var key in data) {
+            if (key >= from.getTime() / 1000 && key <= to.getTime() / 1000) {
+                times.push(String(key));
+            }
+        }
 
-                times = []
-                for (key in data) {
+        times.sort();
+        var smallest = times[0];
 
-                    times.push(String(key));
-                }
+        var lastt = 0;
+        var lasttemp = (data[times[0]]) * (p.height / 60);
+        var lastdate = (new Date(times[0]*1000 + tzOffsetInMs)).getDate();
 
-                times.sort();
-                smallest = times[0];
+        for (k=1; k < times.length; k++) {
+            p.stroke(0);
 
-                var lastt = 0;
-                var lasttemp = (data[times[0]]) * (p.height / 60);
-                lastdate = (new Date(times[0]*1000 + tzOffsetInMs)).getDate();
+            var t = (times[k] - times[0]) * (p.width / (times[times.length - 1] - times[0]));
+            var temp = (30 - data[times[k]]) * (p.height / 60);
+            p.line(lastt, lasttemp, t, temp);
 
-                for (k=1; k < times.length; k++) {
-                    p.stroke(0);
-    
-                    var t = (times[k] - times[0]) * (p.width / (times[times.length - 1] - times[0]));
-                    var temp = (30 - data[times[k]]) * (p.height / 60);
-                    p.line(lastt, lasttemp, t, temp);
-
-                    // Calculate date tics
-                    thisdate = (new Date(times[k]*1000 + tzOffsetInMs)).getDate();
-                    if (thisdate != lastdate) {
-                        p.stroke(0, 25);
-                        p.line(t, 0, t, p.height);
-                        lastdate = thisdate;
-                    }
-                    
-                    //lastrealtime = realtime;
-                    lastt = t;
-                    lasttemp = temp
-                }
-
-                // Draw legend markers
-                p.stroke(0, 255/2);
-                p.line(0, p.height/2, p.width, p.height/2);
+            // Calculate date tics
+            var thisdate = (new Date(times[k]*1000 + tzOffsetInMs)).getDate();
+            if (thisdate != lastdate) {
                 p.stroke(0, 25);
-                p.line(0, p.height/4, p.width, p.height/4);
-                p.line(0, 0, p.width, 0);
-            });
+                p.line(t, 0, t, p.height);
+                lastdate = thisdate;
+            }
+
+            lastt = t;
+            lasttemp = temp
+        }
+
+        // Draw legend markers
+        p.stroke(0, 255/2);
+        p.line(0, p.height/2, p.width, p.height/2);
+        p.stroke(0, 25);
+        p.line(0, p.height/4, p.width, p.height/4);
+        p.line(0, 0, p.width, 0);
         p.exit();
     }
 
@@ -94,9 +131,29 @@ Weather Thing
         p.setup = wview.setup;
         p.draw = wview.draw;
         p.init();
+
+        getData();
+        p.draw();
+
+        // Controls
+
+        $("#fewerdays").click(function() {
+
+            from.setDate(from.getDate() + 1);
+            p.draw()
+            return false;
+        });
+
+        $("#moredays").click(function() {
+
+            from.setDate(from.getDate() - 1);
+            p.draw()
+            return false;
+        });
     });
-
-
-    </script><canvas id="weather" width="800" height="600"></canvas></center>
+    </script>
+    
+    <a href="#" id="fewerdays">-</a> <a href="#" id="moredays">+</a><br>
+    <canvas id="weather" width="800" height="600"></canvas></center>
 </body>
 </html>
