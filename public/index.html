@@ -79,9 +79,16 @@ Weather Thing
     }
 
     wview.draw = function() {
+        //Set things up
+        p.fill(0);
+        p.deja = p.loadFont("DejaVuSerif.svg");
+        p.textFont(p.deja, 12);
         p.background(255);
         p.fill(255);
         p.rect(0, 0, p.width, p.height);
+        p.fill(0);
+
+        // index and sort dates
         var times = []
         for (var key in data) {
             if (key >= from.getTime() / 1000 && key <= to.getTime() / 1000) {
@@ -92,6 +99,8 @@ Weather Thing
         times.sort();
         var smallest = times[0];
 
+
+        //Draw plot
         var lastt = 0;
         var lasttemp = (data[times[0]]) * (p.height / 60);
         var lastdate = (new Date(times[0]*1000 + tzOffsetInMs)).getDate();
@@ -104,10 +113,13 @@ Weather Thing
             p.line(lastt, lasttemp, t, temp);
 
             // Calculate date tics
+            
             var thisdate = (new Date(times[k]*1000 + tzOffsetInMs)).getDate();
             if (thisdate != lastdate) {
                 p.stroke(0, 25);
                 p.line(t, 0, t, p.height);
+                p.text(String(thisdate), t, p.height/2 );
+
                 lastdate = thisdate;
             }
 
@@ -121,16 +133,19 @@ Weather Thing
         p.stroke(0, 25);
         p.line(0, p.height/4, p.width, p.height/4);
         p.line(0, 0, p.width, 0);
+
         p.exit();
     }
 
-    $(document).ready(function() {
+    
 
+    $(document).ready(function() {
 
         p = Processing("weather");
         p.setup = wview.setup;
         p.draw = wview.draw;
         p.init();
+
 
         getData();
         p.draw();
