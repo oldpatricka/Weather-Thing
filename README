@@ -1,4 +1,8 @@
-To get this running, you need to install the json and rack gems:
+If you want to see this running somewhere, checkout:
+
+thing.weatherinvictoria.com
+
+To get this running on your server, you need to install the json and rack gems:
 
 sudo gem install rack json
 
