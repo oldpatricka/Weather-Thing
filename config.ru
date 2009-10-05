@@ -19,6 +19,9 @@ weather_json = Proc.new {|env|
   if req.params["fyear"] and req.params["fmonth"]
     from = Date.new(y=req.params["fyear"].to_i,
                     m=req.params["fmonth"].to_i, d=1)
+  #TODO: parse epoch dates
+  #elsif req.params["from"]
+    #from = Date.new(
   else
     from = Date.today
   end

@@ -36,8 +36,8 @@ Weather Thing
         return map;
     }
 
-    var getData = function() {
-        $.getJSON("/weatherdata?&station=118",
+    var getData = function(fyear, fmonth, tyear, tmonth) {
+        $.getJSON("/weatherdata?&station=118&fyear=" + fyear + "&fmonth=" + fmonth + "&tyear=" + tyear + "&tmonth=" + tmonth,
         function(weatherData){
             data = weatherData;
             wview.draw();
@@ -57,19 +57,20 @@ Weather Thing
     var thisMonth = today.getMonth();
     var thisDay = today.getDate();
 
-
+    
     if (urlVars["from"]) {
         from = new Date(urlVars["from"]*1000);
     }
     else {
-        from = new Date(thisYear, thisMonth, 1);
+        from = new Date();
+        from = new Date(from.setDate(from.getDate() - 7))
     }
 
     if (urlVars["to"]) {
         to = new Date(urlVars["to"]);
     }
     else {
-        to = new Date();
+        to = today;
     }
 
 
@@ -91,7 +92,7 @@ Weather Thing
         // index and sort dates
         var times = []
         for (var key in data) {
-            if (key >= from.getTime() / 1000 && key <= to.getTime() / 1000) {
+            if (key * 1000 >= from.getTime() && key * 1000 <= to.getTime()) {
                 times.push(String(key));
             }
         }
@@ -106,6 +107,7 @@ Weather Thing
         var lastdate = (new Date(times[0]*1000 + tzOffsetInMs)).getDate();
 
         for (k=1; k < times.length; k++) {
+            //console.log(new Date(times[k] * 1000));
             p.stroke(0);
 
             var t = (times[k] - times[0]) * (p.width / (times[times.length - 1] - times[0]));
@@ -145,9 +147,8 @@ Weather Thing
         p.setup = wview.setup;
         p.draw = wview.draw;
         p.init();
-
-
-        getData();
+        
+        getData(from.getFullYear(), from.getMonth()+1, to.getFullYear(), to.getMonth()+1 );
         p.draw();
 
         // Controls
