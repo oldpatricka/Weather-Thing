@@ -28,6 +28,7 @@ Weather Thing
     <center>
 <script>
 
+    // Get variables from query string and return as dictionary
     var getUrlVars = function() {
         var map = {};
         var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi, function(m,key,value) {
@@ -36,6 +37,7 @@ Weather Thing
         return map;
     }
 
+    // Get Data from the backend
     var getData = function(fyear, fmonth, tyear, tmonth) {
         $.getJSON("/weatherdata?&station=118&fyear=" + fyear + "&fmonth=" + fmonth + "&tyear=" + tyear + "&tmonth=" + tmonth,
         function(weatherData){
@@ -50,6 +52,7 @@ Weather Thing
     var p = {};
     var wview = {};
     var from, to;
+    var pixelsperhour = null;
 
     // Date and Time helpers
     var today = new Date();
@@ -57,7 +60,9 @@ Weather Thing
     var thisMonth = today.getMonth();
     var thisDay = today.getDate();
 
-    
+
+    // Get from and to dates. If not specified, 
+    // get data for the last week
     if (urlVars["from"]) {
         from = new Date(urlVars["from"]*1000);
     }
@@ -74,9 +79,19 @@ Weather Thing
     }
 
 
+    // Set up processing drawing functions
     wview.setup = function() {
         p.size(800,600);
         p.noLoop();
+    }
+
+    wview.mouseDragged = function() {
+        var distance = (p.pmouseX - p.mouseX) / pixelsperhour;
+        console.log("Dragged " + distance);
+        from.setHours(from.getHours()+distance);
+        to.setHours(to.getHours()+distance);
+        p.draw()
+
     }
 
     wview.draw = function() {
@@ -96,36 +111,39 @@ Weather Thing
                 times.push(String(key));
             }
         }
-
         times.sort();
         var smallest = times[0];
 
 
+        //Calculate pixels per hour
+        pixelsperhour = p.width / (times.length - 1);
+
         //Draw plot
-        var lastt = 0;
+        var lasttime = 0;
         var lasttemp = (data[times[0]]) * (p.height / 60);
         var lastdate = (new Date(times[0]*1000 + tzOffsetInMs)).getDate();
 
-        for (k=1; k < times.length; k++) {
-            //console.log(new Date(times[k] * 1000));
+        // plot each data point, connecting previous time point to
+        // current point
+        for (t=1; t < times.length; t++) {
             p.stroke(0);
 
-            var t = (times[k] - times[0]) * (p.width / (times[times.length - 1] - times[0]));
-            var temp = (30 - data[times[k]]) * (p.height / 60);
-            p.line(lastt, lasttemp, t, temp);
+            // Draw data line
+            var time = (times[t] - times[0]) * (p.width / (times[times.length - 1] - times[0]));
+            var temp = (30 - data[times[t]]) * (p.height / 60);
+            p.line(lasttime, lasttemp, time, temp);
 
             // Calculate date tics
-            
-            var thisdate = (new Date(times[k]*1000 + tzOffsetInMs)).getDate();
-            if (thisdate != lastdate) {
+            var thisdate = (new Date(times[t]*1000 + tzOffsetInMs)).getDate();
+            if (thisdate != lastdate || lasttime == 0) {
                 p.stroke(0, 25);
-                p.line(t, 0, t, p.height);
-                p.text(String(thisdate), t, p.height/2 );
+                p.line(time, 0, time, p.height);
+                p.text(String(thisdate), time, p.height/2 );
 
                 lastdate = thisdate;
             }
 
-            lastt = t;
+            lasttime = time;
             lasttemp = temp
         }
 
@@ -146,6 +164,7 @@ Weather Thing
         p = Processing("weather");
         p.setup = wview.setup;
         p.draw = wview.draw;
+        p.mouseDragged = wview.mouseDragged;
         p.init();
         
         getData(from.getFullYear(), from.getMonth()+1, to.getFullYear(), to.getMonth()+1 );

@@ -1,1 +1,2 @@
+* Finish Drag implementation
 * Read up on proper HTTP cacheing (using etags or something), and replace what we've got.
