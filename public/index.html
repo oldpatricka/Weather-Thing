@@ -20,6 +20,7 @@ Weather Thing
 
 </style>
 
+<!--[if IE]><script src="js/excanvas.js"></script><![endif]-->
 <script type="text/javascript" src="js/jquery.js"></script>
 <script type="text/javascript" src="js/processing.js"></script>
 
@@ -79,7 +80,8 @@ Weather Thing
         to = new Date(urlVars["to"]);
     }
     else {
-        to = today;
+        to = new Date();
+        to = new Date(to.setDate(to.getDate() - 1));
     }
 
 
