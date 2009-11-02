@@ -26,7 +26,11 @@ Weather Thing
 </head>
 <body>
     <center>
-<script>
+        <script>
+
+    /* The JavaScript here is a hacky mess. Please don't do what I did here. 
+       This is gross 
+    */
 
     // Get variables from query string and return as dictionary
     var getUrlVars = function() {
@@ -42,7 +46,7 @@ Weather Thing
         $.getJSON("/weatherdata?&station=118&fyear=" + fyear + "&fmonth=" + fmonth + "&tyear=" + tyear + "&tmonth=" + tmonth,
         function(weatherData){
             data = weatherData;
-            wview.draw();
+            p.draw();
         });
     }
 
@@ -68,7 +72,7 @@ Weather Thing
     }
     else {
         from = new Date();
-        from = new Date(from.setDate(from.getDate() - 8))
+        from = new Date(from.setDate(from.getDate() - 8));
     }
 
     if (urlVars["to"]) {
@@ -89,7 +93,7 @@ Weather Thing
         var distance = (p.pmouseX - p.mouseX) / pixelsperhour;
         console.log("Dragged " + distance);
         from.setHours(from.getHours()+distance);
-        to.setHours(to.getHours()+distance);
+        new Date(to.setHours(to.getHours()+distance));
         p.draw()
 
     }
@@ -97,8 +101,6 @@ Weather Thing
     wview.draw = function() {
         //Set things up
         p.fill(0);
-        p.deja = p.loadFont("DejaVuSerif.svg");
-        p.textFont(p.deja, 12);
         p.background(255);
         p.fill(255);
         p.rect(0, 0, p.width, p.height);
@@ -164,6 +166,8 @@ Weather Thing
         p = Processing("weather");
         p.setup = wview.setup;
         p.draw = wview.draw;
+        p.deja = p.loadFont("DejaVuSerif.svg");
+        p.textFont(p.deja, 12);
         p.mouseDragged = wview.mouseDragged;
         p.init();
         
