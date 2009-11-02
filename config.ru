@@ -7,6 +7,7 @@ require 'date'
 require 'csv'
 require 'json'
 require 'rack/cache'
+require 'rack/contrib'
 
 # Return JSON weather data
 weather_json = Proc.new {|env|
@@ -106,6 +107,7 @@ builder = Rack::Builder.new do
 
   use Rack::Lint
   use Rewriter
+  #use Rack::ETag
   use Rack::Cache, :verbose     => true, :metastore   => 'file:./tmp/rack/meta', :entitystore => 'file:./tmp/rack/body'
 
   map '/' do
