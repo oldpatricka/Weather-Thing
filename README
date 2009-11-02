@@ -4,7 +4,8 @@ thing.weatherinvictoria.com
 
 To get this running on your server, you need to install the json and rack gems:
 
-sudo gem install rack json
+sudo gem install rack rack-cache json
+sudo gem install rack-rack-contrib --source=http://gems.github.com/  --ignore-dependencies
 
 You can start it with:
 
