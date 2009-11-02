@@ -91,7 +91,6 @@ Weather Thing
 
     wview.mouseDragged = function() {
         var distance = (p.pmouseX - p.mouseX) / pixelsperhour;
-        console.log("Dragged " + distance);
         from.setHours(from.getHours()+distance);
         new Date(to.setHours(to.getHours()+distance));
         p.draw()
