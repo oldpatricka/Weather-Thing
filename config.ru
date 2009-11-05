@@ -90,7 +90,7 @@ weather_json = Proc.new {|env|
     json = JSON.generate t_at_time
     # Cache always expires at 1 am next day
     [200, { 'Content-Type' => 'text/plain', 
-            'Expires' => Time.now.advance(1.day).strftime("%a, %d %b %Y 01:00:00 %Z"),
+            'Expires' => (Time.now + 86_400).strftime("%a, %d %b %Y 01:00:00 %Z"),
             'Cache-Control' => 'max-age=86400, must-revalidate'}, json]
   end
 }
