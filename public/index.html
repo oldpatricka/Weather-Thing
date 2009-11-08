@@ -41,25 +41,18 @@ Weather Thing
         });
         return map;
     }
+    var urlVars = getUrlVars();
 
-    // Get Data from the backend
-    var getData = function(fyear, fmonth, tyear, tmonth) {
-        $.getJSON("/weatherdata?&station=118&fyear=" + fyear + "&fmonth=" + fmonth + "&tyear=" + tyear + "&tmonth=" + tmonth,
-        function(weatherData){
-            data = weatherData;
-            p.draw();
-        });
-    }
 
     var data = {};
-    var urlVars = getUrlVars();
-    var tzOffsetInMs = (new Date()).getTimezoneOffset() * 60 * 1000;
     var p = {};
-    var wview = {};
+    var chart = {};
+    chart.data = 
     var from, to;
     var pixelsperhour = null;
 
     // Date and Time helpers
+    var tzOffsetInMs = (new Date()).getTimezoneOffset() * 60 * 1000;
     var today = new Date();
     var thisYear = today.getFullYear();
     var thisMonth = today.getMonth();
@@ -84,28 +77,34 @@ Weather Thing
         to = new Date(to.setDate(to.getDate() - 1));
     }
 
+    // Get Data from the backend
+    chart.getData = function(fyear, fmonth, tyear, tmonth) {
+        var thisChart = this;
+        $.getJSON("/weatherdata?&station=118&fyear=" + fyear + "&fmonth=" + fmonth + "&tyear=" + tyear + "&tmonth=" + tmonth,
+        function(weatherData){
+            data = weatherData;
+            thisChart.draw();
+        });
+    }
 
     // Set up processing drawing functions
-    wview.setup = function() {
-        p.size(800,600);
-        p.noLoop();
+    chart.setup = function() {
+        this.size($(document).width() - 10,600);
+        this.noLoop();
     }
 
-    wview.mouseDragged = function() {
-        var distance = (p.pmouseX - p.mouseX) / pixelsperhour;
+    chart.mouseDragged = function() {
+        var distance = (this.pmouseX - this.mouseX) / pixelsperhour;
         from.setHours(from.getHours()+distance);
         new Date(to.setHours(to.getHours()+distance));
-        p.draw()
+        this.draw()
 
     }
 
-    wview.draw = function() {
+    chart.draw = function() {
         //Set things up
-        p.fill(0);
-        p.background(255);
-        p.fill(255);
-        p.rect(0, 0, p.width, p.height);
-        p.fill(0);
+        this.background(255);
+        this.fill(0);
 
         // index and sort dates
         var times = []
@@ -119,29 +118,29 @@ Weather Thing
 
 
         //Calculate pixels per hour
-        pixelsperhour = p.width / (times.length - 1);
+        pixelsperhour = this.width / (times.length - 1);
 
         //Draw plot
         var lasttime = 0;
-        var lasttemp = (data[times[0]]) * (p.height / 60);
+        var lasttemp = (data[times[0]]) * (this.height / 60);
         var lastdate = (new Date(times[0]*1000 + tzOffsetInMs)).getDate();
 
         // plot each data point, connecting previous time point to
         // current point
         for (t=1; t < times.length; t++) {
-            p.stroke(0);
+            this.stroke(0);
 
             // Draw data line
-            var time = (times[t] - times[0]) * (p.width / (times[times.length - 1] - times[0]));
-            var temp = (30 - data[times[t]]) * (p.height / 60);
-            p.line(lasttime, lasttemp, time, temp);
+            var time = (times[t] - times[0]) * (this.width / (times[times.length - 1] - times[0]));
+            var temp = (30 - data[times[t]]) * (this.height / 60);
+            this.line(lasttime, lasttemp, time, temp);
 
             // Calculate date tics
             var thisdate = (new Date(times[t]*1000 + tzOffsetInMs)).getDate();
             if (thisdate != lastdate || lasttime == 0) {
-                p.stroke(0, 25);
-                p.line(time, 0, time, p.height);
-                p.text(String(thisdate), time, p.height/2 );
+                this.stroke(0, 25);
+                this.line(time, 0, time, this.height);
+                this.text(String(thisdate), time, this.height/2 );
 
                 lastdate = thisdate;
             }
@@ -151,13 +150,13 @@ Weather Thing
         }
 
         // Draw legend markers
-        p.stroke(0, 255/2);
-        p.line(0, p.height/2, p.width, p.height/2);
-        p.stroke(0, 25);
-        p.line(0, p.height/4, p.width, p.height/4);
-        p.line(0, 0, p.width, 0);
+        this.stroke(0, 255/2);
+        this.line(0, this.height/2, this.width, this.height/2);
+        this.stroke(0, 25);
+        this.line(0, this.height/4, this.width, this.height/4);
+        this.line(0, 0, this.width, 0);
 
-        p.exit();
+        this.exit();
     }
 
     
@@ -165,18 +164,20 @@ Weather Thing
     $(document).ready(function() {
 
         p = Processing("weather");
-        p.setup = wview.setup;
-        p.draw = wview.draw;
-        p.deja = p.loadFont("DejaVuSerif.svg");
-        p.textFont(p.deja, 12);
-        p.mouseDragged = wview.mouseDragged;
+
+        //Hook up functions with Processing Object
+        p.setup = chart.setup;
+        p.draw = chart.draw;
+        p.getData = chart.getData;
+        p.font = p.loadFont("DejaVuSerif.svg");
+        p.textFont(p.font, 12);
+        p.mouseDragged = chart.mouseDragged;
         p.init();
         
-        getData(from.getFullYear(), from.getMonth()+1, to.getFullYear(), to.getMonth()+1 );
-        p.draw();
+        p.getData(from.getFullYear(), from.getMonth()+1, to.getFullYear(), to.getMonth()+1 );
+
 
         // Controls
-
         $("#fewerdays").click(function() {
 
             from.setDate(from.getDate() + 1);
