@@ -1,6 +1,4 @@
-* Finish Drag implementation
-  o Count (and add up) drag events which are shorter than one hour
-  o Automatically load the previous month if it looks like we're going to need
-    to see days in the month before. 
-* Add UI for picking the month (or a date range or something)
+* Show temperature labels. 
+* Show Month, year.
+* Add UI for picking the date range
 * Add UI for picking the weather station

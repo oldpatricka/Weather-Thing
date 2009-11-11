@@ -47,7 +47,7 @@ Weather Thing
     var data = {};
     var p = {};
     var chart = {};
-    chart.data = 
+    chart.data = data;
     var from, to;
     var pixelsperhour = null;
 
@@ -63,18 +63,22 @@ Weather Thing
     // get data for the last week
     if (urlVars["from"]) {
         from = new Date(urlVars["from"]*1000);
+        chart.dataFrom = new Date(from);
     }
     else {
         from = new Date();
         from = new Date(from.setDate(from.getDate() - 8));
+        chart.dataFrom = new Date(from);
     }
 
     if (urlVars["to"]) {
         to = new Date(urlVars["to"]);
+        chart.dataTo = new Date(to);
     }
     else {
         to = new Date();
         to = new Date(to.setDate(to.getDate() - 1));
+        chart.dataTo = new Date(to);
     }
 
     // Get Data from the backend
@@ -93,11 +97,23 @@ Weather Thing
         this.noLoop();
     }
 
+    // mouse drag events scroll the viewing area of the chart
+    // If this dragging pulls the chart beyond the current month
+    // Then load the previous month.
     chart.mouseDragged = function() {
         var distance = (this.pmouseX - this.mouseX) / pixelsperhour;
         from.setHours(from.getHours()+distance);
-        new Date(to.setHours(to.getHours()+distance));
-        this.draw()
+        to.setHours(to.getHours()+distance);
+        this.draw();
+
+        if (from.getDate() >= 1 
+            && chart.dataFrom.getMonth() >= from.getMonth()) {
+            // Use from.getMonth() because javascript subtracts a month from
+            // the real month
+            chart.dataFrom.setMonth(chart.dataFrom.getMonth() - 1);
+            this.getData(chart.dataFrom.getFullYear(), chart.dataFrom.getMonth()+1,
+                         chart.dataTo.getFullYear(), chart.dataTo.getMonth()+1 );   
+        }
 
     }
 
@@ -174,7 +190,7 @@ Weather Thing
         p.mouseDragged = chart.mouseDragged;
         p.init();
         
-        p.getData(from.getFullYear(), from.getMonth()+1, to.getFullYear(), to.getMonth()+1 );
+        p.getData(chart.dataFrom.getFullYear(), chart.dataFrom.getMonth()+1, chart.dataTo.getFullYear(), chart.dataTo.getMonth()+1 );
 
 
         // Controls
