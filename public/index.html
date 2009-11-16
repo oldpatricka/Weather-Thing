@@ -50,6 +50,7 @@ Weather Thing
     chart.data = data;
     var from, to;
     var pixelsperhour = null;
+    var loading = false;
 
     // Date and Time helpers
     var tzOffsetInMs = (new Date()).getTimezoneOffset() * 60 * 1000;
@@ -57,7 +58,8 @@ Weather Thing
     var thisYear = today.getFullYear();
     var thisMonth = today.getMonth();
     var thisDay = today.getDate();
-
+    var monthAsString = ["January", "February", "March", "April", "May", "June", "July", "August",
+                         "September", "October", "November", "December"]
 
     // Get from and to dates. If not specified, 
     // get data for the last week
@@ -81,12 +83,16 @@ Weather Thing
         chart.dataTo = new Date(to);
     }
 
+
     // Get Data from the backend
     chart.getData = function(fyear, fmonth, tyear, tmonth) {
         var thisChart = this;
+        loading = true;
+        thisChart.draw();
         $.getJSON("/weatherdata?&station=118&fyear=" + fyear + "&fmonth=" + fmonth + "&tyear=" + tyear + "&tmonth=" + tmonth,
         function(weatherData){
             data = weatherData;
+            loading = false;
             thisChart.draw();
         });
     }
@@ -106,11 +112,11 @@ Weather Thing
         to.setHours(to.getHours()+distance);
         this.draw();
 
-        if (from.getDate() >= 1 
+        if (from.getDate() <= 1 
             && chart.dataFrom.getMonth() >= from.getMonth()) {
-            // Use from.getMonth() because javascript subtracts a month from
-            // the real month
-            chart.dataFrom.setMonth(chart.dataFrom.getMonth() - 1);
+
+            // Use from.getMonth()+1  because javascript numbers months 0-11
+            chart.dataFrom.setMonth(chart.dataFrom.getMonth()-1);
             this.getData(chart.dataFrom.getFullYear(), chart.dataFrom.getMonth()+1,
                          chart.dataTo.getFullYear(), chart.dataTo.getMonth()+1 );   
         }
@@ -151,12 +157,17 @@ Weather Thing
             var temp = (30 - data[times[t]]) * (this.height / 60);
             this.line(lasttime, lasttemp, time, temp);
 
-            // Calculate date tics
+            // Calculate iand display date tics
             var thisdate = (new Date(times[t]*1000 + tzOffsetInMs)).getDate();
+            var thismonth = (new Date(times[t]*1000 + tzOffsetInMs)).getMonth();
             if (thisdate != lastdate || lasttime == 0) {
                 this.stroke(0, 25);
                 this.line(time, 0, time, this.height);
                 this.text(String(thisdate), time, this.height/2 );
+
+                if (thisdate === 1) {
+                    this.text(monthAsString[thismonth], time, this.height/2 + 20);
+                }
 
                 lastdate = thisdate;
             }
@@ -172,6 +183,17 @@ Weather Thing
         this.line(0, this.height/4, this.width, this.height/4);
         this.line(0, 0, this.width, 0);
 
+
+        // Draw loading text
+        if (loading) {
+            this.fill(0);
+            this.stroke(0);
+            this.rect(20, 20, 70, 30);
+            this.fill(255);
+            this.stroke(255);
+            this.text("Loading...", 25, 25 );
+        }
+
         this.exit();
     }
 
@@ -185,8 +207,8 @@ Weather Thing
         p.setup = chart.setup;
         p.draw = chart.draw;
         p.getData = chart.getData;
-        p.font = p.loadFont("DejaVuSerif.svg");
-        p.textFont(p.font, 12);
+        p.font = p.loadFont("LiberationSans-Regular.svg");
+        p.textFont(p.font, 14);
         p.mouseDragged = chart.mouseDragged;
         p.init();
         
