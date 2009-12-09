@@ -74,7 +74,7 @@ Weather Thing
     }
 
     if (urlVars["to"]) {
-        to = new Date(urlVars["to"]);
+        to = new Date(urlVars["to"]*1000);
         chart.dataTo = new Date(to);
     }
     else {
